@@ -1,6 +1,6 @@
 from ollama import chat
 
-def generate_respponce(messaages, model="gemma4"):
+def generate_responce(messaages, model="gemma4"):
     try:
         response = chat(model=model, messages=messaages)
 
