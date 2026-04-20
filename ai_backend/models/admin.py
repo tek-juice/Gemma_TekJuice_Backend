@@ -1,14 +1,13 @@
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
 from config.services.extensions import db
+from datetime import datetime
 
-
-
-class User(db.Model):
-    __tablename__ = "users"
+class Admin(db.Model):
+    __tablename__ = "admins"
 
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable= False)
     password = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    def is_admin(self):
+        return True

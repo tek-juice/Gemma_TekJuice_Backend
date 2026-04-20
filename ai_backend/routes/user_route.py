@@ -1,17 +1,17 @@
 from flask import Blueprint, request, jsonify
-from models.admin import db, Admin
-from werkzeug.security import generate_password_hash
+from  models.user import User
+from config.services.extensions import db
+from werkzeug.security import generate_password_hash, check_password_hash
 
-admin_bp = Blueprint("admin",__name__)
+user_bp = Blueprint("user", __name__)
 
-@admin_bp.route("/admin/register", methods=["POST"])
-
-def register_admin():
+@user_bp.route("/user/register", methods=["POST"])
+def register_user():
     """
-    Register an admin user
+    Register a new user
     ---
     tags:
-      - Admin
+      - User
     parameters:
       - name: body
         in: body
@@ -24,13 +24,13 @@ def register_admin():
           properties:
             email:
               type: string
-              example: admin@example.com
+              example: user@example.com
             password:
               type: string
               example: secret123
     responses:
       201:
-        description: Admin created successfully
+        description: User created successfully
       400:
         description: Missing fields or user exists
     """
@@ -42,30 +42,30 @@ def register_admin():
     if not email or not password:
         return jsonify({"error": "Email and password required"}), 400
     
-    existing_user = Admin.query.filter_by(email=email).first()
+    existing_user = User.query.filter_by(email=email).first()
     if existing_user:
         return jsonify({"error": "User already exists"}), 400
     
     hashed_password = generate_password_hash(password)
 
-    admin = Admin(
+    user = User(
         email = email,
-        password = hashed_password,
+        password = hashed_password
     )
 
-    db.session.add(admin)
+    db.session.add(user)
     db.session.commit()
 
-    return jsonify({"message": "Admin created succefully"}), 201
+    return jsonify({"message": "User created succefully"}), 201
 
 
-@admin_bp.route("admin/login", methods=["POST"])
-def admin_login():
+@user_bp.route("/user/login", methods=["POST"])
+def login_user():
     """
-    Admin login
+    User login
     ---
     tags:
-      - Admin
+      - User
     parameters:
       - name: body
         in: body
@@ -78,7 +78,7 @@ def admin_login():
           properties:
             email:
               type: string
-              example: admin@example.com
+              example: user@example.com
             password:
               type: string
               example: secret123
@@ -94,14 +94,18 @@ def admin_login():
     password = data.get("password")
 
     if not email or not password:
-        return jsonify({"error": "Email and password reqired"}), 400
+        return jsonify({"error": "Email and password required"}), 400
     
-    admin = Admin.query.filter_by(email=email).first()
-
-    if not admin:
-        return jsonify({"error": "Invalid admin credentials"}), 401
+    user =User.query.filter_by(email = email).first()
+    
+    if not user:
+        return jsonify({"error": "Invalid credentials"}), 401
+    
+    if not check_password_hash(user.password, password):
+        return jsonify({"error": "Invalid credentials"}), 401
     
     return jsonify({
-        "message": "Admin login succeful",
-        "admin_id": admin.id
+        "message": "User login succeful"
     }), 200
+        
+
