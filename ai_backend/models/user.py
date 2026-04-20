@@ -12,3 +12,6 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    # relationship 
+    api_keys = db.relationship("ApiKey", back_populates="user", lazy=True)
+
