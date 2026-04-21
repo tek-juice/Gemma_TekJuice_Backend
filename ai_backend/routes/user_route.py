@@ -105,7 +105,9 @@ def login_user():
         return jsonify({"error": "Invalid credentials"}), 401
     
     return jsonify({
-        "message": "User login succeful"
+      "message": "Login successful",
+      "user_id": user.id,
+      "token": "some-jwt-token-here"
     }), 200
         
 

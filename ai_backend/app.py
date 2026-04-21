@@ -8,6 +8,7 @@ from routes.auth_chat_route import chat_secure_bp
 from flasgger import Swagger
 import os
 from config.services.extensions import db
+from flask_cors import CORS
 
 from dotenv import load_dotenv
 
@@ -15,6 +16,8 @@ load_dotenv()
 
 
 app = Flask(__name__)
+
+CORS(app)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] =False

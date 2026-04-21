@@ -46,5 +46,6 @@ def create_api_key():
 
     return jsonify({
         "message": "API key created successfully",
-        "api_key": api_key.key 
+        "api_key": api_key.key,
+        "user_id": user.id
     }), 201
