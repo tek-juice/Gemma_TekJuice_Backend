@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from services.ollama_services import generate_responce
+from config.services.ollama_services import generate_responce
 
 chat_bp = Blueprint("chat", __name__)
 
