@@ -7,46 +7,49 @@ chat_secure_bp = Blueprint("chat_secure", __name__)
 @chat_secure_bp.route("/chat/secure", methods=["POST"])
 def chat_secure():
     """
-    Autheticated Chat with ai
-    ---
-    tags:
-        - Chat:
-    parameters:
-        - name: x-api-key
-          in: header
-          required: true
-          type: string
-          description: User API key
-        - name: body
-          in: body
-          required: true
-          schema:
-            type: object
-            required:
-               - messages
-            properties:
-              model:
-                type: string
-                example: gemma 4
-              messages:
-                type: array
-                itmes:
-                type: object
-                properties:
-                   role:
-                      type: string
-                      example: user
-                   content:
-                      type: string
-                      example: Hello AI
-    responses:
-        200:
-          description: AI response
-        401:
-          description: Unauthorized
-    """
+Authenticated Chat with AI
+---
+tags:
+  - Chat
 
-    api_key_value = request.headers.get("x_api_key")
+parameters:
+  - name: x-api-key
+    in: header
+    required: true
+    type: string
+    description: User API key
+
+  - name: body
+    in: body
+    required: true
+    schema:
+      type: object
+      required:
+        - messages
+      properties:
+        model:
+          type: string
+          example: gemma3:1b
+        messages:
+          type: array
+          items:
+            type: object
+            properties:
+              role:
+                type: string
+                example: user
+              content:
+                type: string
+                example: Hello AI
+
+responses:
+  200:
+    description: AI response
+  401:
+    description: Unauthorized
+"""
+
+    api_key_value = request.headers.get("x-api-key")
      
     if not api_key_value:
         return jsonify({"error": "API key required"}), 401
@@ -54,7 +57,7 @@ def chat_secure():
     api_key = ApiKey.query.filter_by(
         key = api_key_value,
         is_active=True
-    ). first()
+    ).first()
 
     if not api_key:
         return jsonify({"error": "Invalid API key"}), 401
@@ -63,7 +66,7 @@ def chat_secure():
 
     data = request.get_json() or {}
 
-    messages = data.get("message", [])
+    messages = data.get("messages", [])
     model = data.get("model", "gemma4")
 
     if not messages:
