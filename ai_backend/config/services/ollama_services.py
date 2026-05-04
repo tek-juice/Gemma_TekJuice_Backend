@@ -1,10 +1,9 @@
 from ollama import chat
+from flask import Response, stream_with_context
 
-def generate_responce(messaages, model="gemma4"):
-    try:
-        response = chat(model=model, messages=messaages)
+def generate_stream(messages, model="gemma4"):
+    stream = chat(model=model, messages=messages, stream=True)
 
-        return response["message"]["content"]
-    
-    except Exception as e:
-        return str(e)
+    for chunk in stream:
+        content = chunk["message"]["content"]
+        yield content

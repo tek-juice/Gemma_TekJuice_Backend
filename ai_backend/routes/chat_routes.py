@@ -1,5 +1,5 @@
-from flask import Blueprint, request, jsonify
-from config.services.ollama_services import generate_responce
+from flask import Blueprint, request, Response, stream_with_context
+from config.services.ollama_services import generate_stream
 
 chat_bp = Blueprint("chat", __name__)
 
@@ -51,10 +51,17 @@ def chat():
     model = data.get("model", "gemma4")
 
     if not messages:
-        return jsonify({"error": "Messages are required"}), 400
+        return {"error": "Messages are required"}, 400
 
-    response = generate_responce(messages, model)
+    def stream():
+        try:
+            for chunk in generate_stream(messages, model):
+                # Send chunk immediately to frontend
+                yield chunk
+        except Exception as e:
+            yield f"\n[ERROR]: {str(e)}"
 
-    return jsonify({
-        "response": response
-    })
+    return Response(
+        stream_with_context(stream()),
+        content_type="text/plain"
+    )
