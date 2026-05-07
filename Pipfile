@@ -12,6 +12,7 @@ psycopg2-binary = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
 flask-cors = "*"
+flask-jwt-extended = "*"
 
 [dev-packages]
 ipykernel = "*"
