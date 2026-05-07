@@ -11,6 +11,7 @@ import os
 from config.services.extensions import db
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from flask_migrate import Migrate
 
 from dotenv import load_dotenv
 
@@ -29,6 +30,8 @@ jwt = JWTManager(app)
 
 db.init_app(app)
 
+migrate = Migrate(app, db)
+
 swagger = Swagger(app)
 
 app.register_blueprint(chat_bp, url_prefix="/api/v1")
@@ -39,8 +42,6 @@ app.register_blueprint(api_key_create_bp, url_prefix="/api/v1")
 # app.register_blueprint(chat_secure_bp, url_prefix="/api/v1")
 app.register_blueprint(api_key_fetch_bp, url_prefix="/api/v1")
 
-with app.app_context():
-    db.create_all()
 
 if __name__=="__main__":
     app.run(debug=True)

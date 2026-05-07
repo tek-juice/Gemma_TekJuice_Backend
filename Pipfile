@@ -10,9 +10,9 @@ ollama = "*"
 flasgger = "*"
 psycopg2-binary = "*"
 flask-sqlalchemy = "*"
-flask-migrate = "*"
 flask-cors = "*"
 flask-jwt-extended = "*"
+flask-migrate = "*"
 
 [dev-packages]
 ipykernel = "*"
