@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from  models.user import User
+from models.user import User
 from config.services.extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
@@ -7,6 +7,8 @@ import re
 import random
 from datetime import datetime, timedelta
 from models.user import EmailVerification
+
+from config.email_service import send_verification_email
 
 user_bp = Blueprint("user", __name__)
 
@@ -85,9 +87,12 @@ def register_user():
          expires_at=datetime.utcnow() + timedelta(minutes=10)
       )
 
+
       db.session.add(verification)
       db.session.commit()
 
+      send_verification_email(email, code)
+      
       return jsonify({"message": "User created succefully"}), 201
     
     except Exception as e:
@@ -120,7 +125,7 @@ def verify_email():
                 example: user@example.com
               code:
                 type: string
-                example: 483920
+                example: "483920"
 
       responses:
         200:

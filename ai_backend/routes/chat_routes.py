@@ -1,5 +1,5 @@
 from flask import Blueprint, request, Response, stream_with_context
-from config.services.ollama_services import generate_stream
+from config.ollama_services import generate_stream
 
 chat_bp = Blueprint("chat", __name__)
 

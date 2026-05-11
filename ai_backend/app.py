@@ -14,7 +14,7 @@ from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 
 from dotenv import load_dotenv
-
+from config.services.extensions import mail
 load_dotenv()
 
 
@@ -22,6 +22,7 @@ app = Flask(__name__)
 
 CORS(app)
 
+# Database 
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] =False
 app.config["JWT_SECRET_KEY"] = "super-secret-key"
@@ -33,6 +34,16 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 swagger = Swagger(app)
+
+# Email code
+app.config["MAIL_SERVER"] = "smtp.gmail.com"
+app.config["MAIL_PORT"] = 587
+app.config["MAIL_USE_TLS"] = True
+app.config["MAIL_USE_SSL"] = False
+app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
+app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_USERNAME")
+mail.init_app(app)
 
 app.register_blueprint(chat_bp, url_prefix="/api/v1")
 app.register_blueprint(admin_bp, url_prefix="/api/v1")
