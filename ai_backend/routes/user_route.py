@@ -172,7 +172,7 @@ def verify_email():
       db.session.commit()
 
       return jsonify({
-         "message:" "Email verified successfully"
+         "message": "Email verified successfully"
       }), 200
 
     except Exception as e:
