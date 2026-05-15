@@ -7,6 +7,7 @@ import re
 import random
 from datetime import datetime, timedelta
 from models.user import EmailVerification
+from flask_jwt_extended import jwt_required, get_jwt
 
 from config.email_service import send_verification_email
 
@@ -91,8 +92,8 @@ def register_user():
       db.session.add(verification)
       db.session.commit()
 
-      send_verification_email(email, code)
-      
+      send_verification_email(name, email, code)
+
       return jsonify({"message": "User created succefully"}), 201
     
     except Exception as e:
@@ -232,7 +233,10 @@ def login_user():
     if not check_password_hash(user.password, password):
         return jsonify({"error": "Invalid credentials"}), 401
     
-    access_token = create_access_token(identity=user.id)
+    access_token = create_access_token(identity=str(user.id),
+                                       additional_claims={
+                                          "role": user.role
+                                       })
     
     return jsonify({
       "message": "Login successful",
@@ -241,5 +245,25 @@ def login_user():
       "email": user.email,
       "name": user.name
     }), 200
-        
+      
 
+# Permission helpers (Admins should access user and admin routes)
+def user_required(fn):
+   def wrapper(*args, **kwargs):
+      claims = get_jwt()
+
+      if claims.get("role") not in ["user", "admin"]:
+         return {"error": "Access denied"}, 403
+      
+      return fn(*args, **kwargs)
+   return wrapper
+
+def admin_required(fn):
+   def wrapper(*args, **kwargs):
+      claims = get_jwt()
+
+      if claims.get("role") != "admin":
+         return {"error": "Admins only"}, 403
+      
+      return fn(*args, **kwargs)
+   return wrapper

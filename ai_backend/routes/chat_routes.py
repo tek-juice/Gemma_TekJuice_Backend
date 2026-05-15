@@ -1,9 +1,11 @@
 from flask import Blueprint, request, Response, stream_with_context
 from config.ollama_services import generate_stream
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 chat_bp = Blueprint("chat", __name__)
 
 @chat_bp.route("/chat", methods=["POST"])
+@jwt_required()
 def chat():
     """
     Chat with Gemma 4
@@ -21,7 +23,7 @@ def chat():
           properties:
             model:
               type: string
-              example: gemma4
+              example: gemma3:1b
             messages:
               type: array
               items:
@@ -45,10 +47,13 @@ def chat():
       400:
         description: Bad request
     """
+
+    current_user_id = get_jwt_identity()
+
     data = request.get_json()
 
     messages = data.get("messages", [])
-    model = data.get("model", "gemma4")
+    model = data.get("model", "gemma3:1b")
 
     if not messages:
         return {"error": "Messages are required"}, 400

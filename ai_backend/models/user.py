@@ -13,6 +13,7 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
     is_email_verified = db.Column(db.Boolean, default=False)
     profile_picture = db.Column(db.String(255), nullable=True)
+    role = db.Column(db.String(255), nullable=False, default="user")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 

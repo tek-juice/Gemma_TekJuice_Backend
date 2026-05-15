@@ -4,7 +4,7 @@ from routes.admin_route import admin_bp
 from routes.user_route import user_bp
 from routes.user_show import usershow_bp
 from routes.apikey import api_key_create_bp
-# from routes.auth_chat_route import chat_secure_bp
+from routes.auth_chat_route import chat_secure_bp
 from routes.get_api_key import api_key_fetch_bp
 from flasgger import Swagger
 import os
@@ -33,7 +33,48 @@ db.init_app(app)
 
 migrate = Migrate(app, db)
 
-swagger = Swagger(app)
+swagger_config = {
+    "headers": [],
+    "specs": [
+        {
+            "endpoint": "apispec_1",
+            "route": "/apispec_1.json",
+            "rule_filter": lambda rule: True,
+            "model_filter": lambda tag: True,
+        }
+    ],
+    "static_url_path": "/flasgger_static",
+    "swagger_ui": True,
+    "specs_route": "/docs/",
+
+    "swagger_ui_config": {
+        "persistAuthorization": True
+    }
+}
+
+swagger_template = {
+    "swagger": "2.0",
+    "info": {
+        "title": "Plug Sites API",
+        "description": "AI API Platform",
+        "version": "1.0"
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "description": "Paste exactly: Bearer <JWT_TOKEN>"
+        }
+    },
+    "security": [
+        {
+            "Bearer": []
+        }
+    ]
+}
+
+swagger = Swagger(app, config=swagger_config, template=swagger_template)
 
 # Email code
 app.config["MAIL_SERVER"] = "smtp.gmail.com"
@@ -50,7 +91,7 @@ app.register_blueprint(admin_bp, url_prefix="/api/v1")
 app.register_blueprint(user_bp, url_prefix="/api/v1")
 app.register_blueprint(usershow_bp, url_prefix="/api/v1")
 app.register_blueprint(api_key_create_bp, url_prefix="/api/v1")
-# app.register_blueprint(chat_secure_bp, url_prefix="/api/v1")
+app.register_blueprint(chat_secure_bp, url_prefix="/api/v1")
 app.register_blueprint(api_key_fetch_bp, url_prefix="/api/v1")
 
 
