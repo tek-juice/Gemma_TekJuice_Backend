@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "62697566e15ff7dfd27970920daeb54e985ed112e5c764dcf00d31de4915f9f4"
+            "sha256": "a98660d433da603005cd338db1cdfe0b4148b6ced1e0cdb39ed380b70ad93305"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -66,11 +66,11 @@
         },
         "click": {
             "hashes": [
-                "sha256:398329ad4837b2ff7cbe1dd166a4c0f8900c3ca3a218de04466f38f6497f18a2",
-                "sha256:a2bf429bb3033c89fa4936ffb35d5cb471e3719e1f3c8a7c3fff0b8314305613"
+                "sha256:40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+                "sha256:638f1338fe1235c8f4e008e4a8a254fb5c5fbdcbb40ece3c9142ebb78e792973"
             ],
             "markers": "python_version >= '3.10'",
-            "version": "==8.3.3"
+            "version": "==8.4.0"
         },
         "colorama": {
             "hashes": [
@@ -115,12 +115,12 @@
         },
         "flask-jwt-extended": {
             "hashes": [
-                "sha256:52f35bf0985354d7fb7b876e2eb0e0b141aaff865a22ff6cc33d9a18aa987978",
-                "sha256:8085d6757505b6f3291a2638c84d207e8f0ad0de662d1f46aa2f77e658a0c976"
+                "sha256:78fd0f460317facf3a0084a6457ffaf2f1dda9eefbd576f94cea35b0eadd5531",
+                "sha256:daad1981117f4972d63c363d013f290de307aad781a935921b603b714817393c"
             ],
             "index": "pypi",
-            "markers": "python_version >= '3.9' and python_version < '4'",
-            "version": "==4.7.1"
+            "markers": "python_version >= '3.10' and python_version < '4'",
+            "version": "==4.7.4"
         },
         "flask-mail": {
             "hashes": [
@@ -251,6 +251,7 @@
                 "sha256:c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
                 "sha256:e0050c0b7da1eea53ffaf149c0cfbb5c6e2e2b69c4bef22c81fa6eb73e5f6173"
             ],
+            "index": "pypi",
             "markers": "python_version >= '3.8'",
             "version": "==2.2.0"
         },
@@ -383,11 +384,11 @@
         },
         "mistune": {
             "hashes": [
-                "sha256:708487c8a8cdd99c9d90eb3ed4c3ed961246ff78ac82f03418f5183ab70e398a",
-                "sha256:febdc629a3c78616b94393c6580551e0e34cc289987ec6c35ed3f4be42d0eee1"
+                "sha256:78cdb0ba5e938053ccf63651b352508d2efa9411dc8810bfb05f2dc5140c0048",
+                "sha256:7c8e5501d38bac1582e067e46c8343f17d57ea1aaa735823f3aba1fd59c88a28"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==3.2.0"
+            "version": "==3.2.1"
         },
         "ollama": {
             "hashes": [

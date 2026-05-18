@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from models.user import User
 from config.services.extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -8,8 +8,11 @@ import random
 from datetime import datetime, timedelta
 from models.user import EmailVerification
 from flask_jwt_extended import jwt_required, get_jwt
-
 from config.email_service import send_verification_email
+from itsdangerous import URLSafeTimedSerializer
+from config.email_service import send_password_reset_email
+
+
 
 user_bp = Blueprint("user", __name__)
 
@@ -339,3 +342,151 @@ def change_password():
          "error": "Something went wrong",
          "details": str(e)
       }), 500
+
+@user_bp.route("/user/forgot-password", methods=["POST"])
+def forgot_password():
+   """
+    Forgot Password
+    ---
+    tags:
+      - User
+
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          required:
+            - email
+          properties:
+            email:
+              type: string
+              example: user@example.com
+
+    responses:
+      200:
+        description: Reset link sent
+      404:
+        description: User not found
+    """
+   
+   try:
+      data = request.get_json()
+
+      email = data.get("email")
+
+      if not email:
+         return jsonify({
+            "error": "Email is required"
+         }), 400
+      
+      user = User.query.filter_by(email=email).first()
+
+      if not user:
+         return jsonify({
+            "error": "User not found"
+         }), 404
+      
+      serializer = URLSafeTimedSerializer(
+         current_app.config["JWT_SECRET_KEY"]
+      )
+
+      token = serializer.dumps(email, salt="password-reset-salt")
+
+      reset_url = f"http://127.0.0.1:5000/user/reset-password/{token}"
+
+      send_password_reset_email(user.name, user.email, reset_url)
+
+      return jsonify({
+         "message": "Password reset link has been sent to your email"
+      }), 200
+   
+   except Exception as e:
+      return jsonify({
+         "error": "Something went wrong",
+         "details": str(e)
+      }), 500
+
+@user_bp.route("/user/reset-password/<token>", methods=["POST"])
+def reset_password(token):
+    """
+      Reset Password
+      ---
+      tags:
+        - User
+
+      parameters:
+        - name: token
+          in: path
+          type: string
+          required: true
+
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - password
+            properties:
+              password:
+                type: string
+                example: newpassword123
+
+      responses:
+        200:
+          description: Password reset successful
+        400:
+          description: Invalid or expired token
+    """
+
+    try:
+       
+       data = request.get_json()
+
+       new_password = data.get("password")
+
+       if not new_password:
+          return jsonify({
+             "error": "Password required"
+          }), 400
+       
+       serializer =  URLSafeTimedSerializer(
+          current_app.config["JWT_SECRET_KEY"]
+       )
+
+       try:
+          email = serializer.loads(
+             token,
+             salt="password-reset-salt",
+             max_age=900 # 15mins
+          )
+
+       except Exception:
+          return jsonify({
+             "error": "Invalid or expired token"
+          }), 400
+       
+       user = User.query.filter_by(email=email).first()
+
+       if not user:
+          return jsonify({
+             "error": "User not found"
+          }), 404
+       
+       hashed_password = generate_password_hash(new_password)
+
+       user.password = hashed_password
+
+       db.session.commit()
+
+       return jsonify({
+          "message": "Password reset succefull"
+       }), 200
+    
+    except Exception as e:
+       return jsonify({
+          "error": "Something went wrong",
+          "details": str(e)
+       }), 500
