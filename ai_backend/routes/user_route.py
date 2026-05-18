@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from models.user import User
 from config.services.extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, get_jwt_identity
 import re
 import random
 from datetime import datetime, timedelta
@@ -245,3 +245,97 @@ def login_user():
       "email": user.email,
       "name": user.name
     }), 200
+
+
+@user_bp.route("/user/change-password", methods=["PUT"])
+@jwt_required()
+def change_password():
+   """
+    Change User Password
+    ---
+    tags:
+      - User
+
+    security:
+      - Bearer: []
+
+    consumes:
+      - application/json
+
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          required:
+            - current_password
+            - new_password
+          properties:
+            current_password:
+              type: string
+              example: oldpassword123
+
+            new_password:
+              type: string
+              example: newpassword456
+
+    responses:
+      200:
+        description: Password changed successfully
+
+      400:
+        description: Missing fields
+
+      401:
+        description: Invalid current password
+
+      404:
+        description: User not found
+    """
+
+   try: 
+      data = request.get_json()
+
+      current_password = data.get("current_password")
+      new_password = data.get("new_password")
+
+      if not current_password or not new_password:
+         return jsonify({
+            "error": "Current password and new password required"
+         }), 400
+      
+      user_id = get_jwt_identity()
+
+      user = User.query.get(user_id)
+
+      if not user:
+         return jsonify({
+            "error": "User not found, contact admin"
+         }),404
+      
+      if not check_password_hash(user.password, current_password):
+         return jsonify({
+            "error": "current password is incorrect"
+         }), 401
+      
+      if check_password_hash(user.password, new_password):
+         return jsonify({
+            "error": "New password cannot be the same as current password"
+         }), 400
+      
+      hashed_password = generate_password_hash(new_password)
+
+      user.password = hashed_password
+
+      db.session.commit()
+
+      return jsonify({
+         "massage": "password changed succesfully"
+      }), 200
+   
+   except Exception as e:
+      return jsonify({
+         "error": "Something went wrong",
+         "details": str(e)
+      }), 500
