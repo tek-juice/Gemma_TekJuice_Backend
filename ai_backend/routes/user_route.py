@@ -245,25 +245,3 @@ def login_user():
       "email": user.email,
       "name": user.name
     }), 200
-      
-
-# Permission helpers (Admins should access user and admin routes)
-def user_required(fn):
-   def wrapper(*args, **kwargs):
-      claims = get_jwt()
-
-      if claims.get("role") not in ["user", "admin"]:
-         return {"error": "Access denied"}, 403
-      
-      return fn(*args, **kwargs)
-   return wrapper
-
-def admin_required(fn):
-   def wrapper(*args, **kwargs):
-      claims = get_jwt()
-
-      if claims.get("role") != "admin":
-         return {"error": "Admins only"}, 403
-      
-      return fn(*args, **kwargs)
-   return wrapper

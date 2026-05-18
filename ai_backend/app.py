@@ -74,6 +74,13 @@ swagger_template = {
     ]
 }
 
+swagger_config["parser_options"] = {
+    "swagger_from_file": False
+}
+
+swagger_config["rule_filter"] = lambda rule: True
+swagger_config["endpoint_filter"] = lambda endpoint: True
+
 swagger = Swagger(app, config=swagger_config, template=swagger_template)
 
 # Email code
