@@ -3,9 +3,9 @@ from routes.chat_routes import chat_bp
 from routes.admin_route import admin_bp
 from routes.user_route import user_bp
 from routes.user_show import usershow_bp
-from routes.apikey import api_key_create_bp
+from routes.apikey import api_key_bp
 from routes.auth_chat_route import chat_secure_bp
-from routes.get_api_key import api_key_fetch_bp
+from routes.projects import project_bp
 from flasgger import Swagger
 import os
 from config.services.extensions import db
@@ -97,9 +97,9 @@ app.register_blueprint(chat_bp, url_prefix="/api/v1")
 app.register_blueprint(admin_bp, url_prefix="/api/v1")
 app.register_blueprint(user_bp, url_prefix="/api/v1")
 app.register_blueprint(usershow_bp, url_prefix="/api/v1")
-app.register_blueprint(api_key_create_bp, url_prefix="/api/v1")
+app.register_blueprint(api_key_bp, url_prefix="/api/v1")
 app.register_blueprint(chat_secure_bp, url_prefix="/api/v1")
-app.register_blueprint(api_key_fetch_bp, url_prefix="/api/v1")
+app.register_blueprint(project_bp, url_prefix="/api/v1")
 
 
 if __name__=="__main__":
