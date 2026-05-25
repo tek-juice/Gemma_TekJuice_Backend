@@ -124,3 +124,47 @@ def get_api_keys_by_user():
             for key in api_keys
         ]
     }), 200
+
+@api_key_bp.route("/key/<int:key_id>", methods=["DELETE"])
+@jwt_required()
+def delete_api_key(key_id):
+    """
+    Delete an API key
+    ---
+    tags:
+      - API Keys
+    security:
+      - Bearer: []
+    parameters:
+      - in: path
+        name: key_id
+        required: true
+        type: integer
+        description: ID of the API key to delete
+    responses:
+      200:
+        description: API key deleted successfully
+      404:
+        description: API key not found
+      403:
+        description: Unauthorized to delete this API key
+    """
+    current_user_id = int(get_jwt_identity())
+
+    api_key = ApiKey.query.filter_by(id=key_id).first()
+
+    if not api_key:
+        return jsonify({
+            "error": "Api Key is not found"
+        }), 404
+    
+    if api_key.user_id != current_user_id:
+        return jsonify({"error": "You are not allowed to delete this API key"}), 403
+    
+    db.session.delete(api_key)
+    db.session.commit()
+
+    return jsonify({
+        "message": "API key deleted succefully",
+        "deleted_key_id": key_id
+    }), 200
