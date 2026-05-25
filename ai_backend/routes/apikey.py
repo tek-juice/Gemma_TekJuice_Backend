@@ -151,15 +151,12 @@ def delete_api_key(key_id):
     """
     current_user_id = int(get_jwt_identity())
 
-    api_key = ApiKey.query.filter_by(id=key_id).first()
+    api_key = ApiKey.query.filter_by(id=key_id, user_id=current_user_id).first()
 
     if not api_key:
         return jsonify({
             "error": "Api Key is not found"
         }), 404
-    
-    if api_key.user_id != current_user_id:
-        return jsonify({"error": "You are not allowed to delete this API key"}), 403
     
     db.session.delete(api_key)
     db.session.commit()
