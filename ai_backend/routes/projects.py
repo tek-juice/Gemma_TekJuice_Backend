@@ -11,41 +11,41 @@ project_bp = Blueprint("project_bp", __name__)
 @jwt_required()
 def create_project():
     """
-        Create a new project
-        ---
-        tags:
-        - Projects
-        security:
-        - Bearer: []
-        parameters:
-        - in: body
-            name: body
-            required: true
-            schema:
-            type: object
-            required:
-                - name
-            properties:
-                name:
-                type: string
-                example: AI Chat System
-                description:
-                type: string
-                example: Handles chatbot workflows
-        responses:
-        201:
-            description: Project created successfully
-            schema:
-            type: object
-            properties:
-                message:
-                type: string
-                example: Project created successfully
-        400:
-            description: Validation error
-        404:
-            description: User not found
-    """
+Create a new project
+---
+tags:
+  - Projects
+security:
+  - Bearer: []
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: AI Chat System
+        description:
+          type: string
+          example: Handles chatbot workflows
+responses:
+  201:
+    description: Project created successfully
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Project created successfully
+  400:
+    description: Validation error
+  404:
+    description: User not found
+"""
     data = request.get_json()
 
     name = data.get("name")
@@ -74,37 +74,36 @@ def create_project():
         "message": "Project created succefully"
     }), 201
 
-@project_bp.route("/project/<int:project_id", methods=["DELETE"])
+@project_bp.route("/project/<int:project_id>", methods=["DELETE"])
 @jwt_required()
 def delete_project(project_id):
     """
-        Delete a project (and all API keys under it)
-        ---
-        tags:
-        - Projects
-        security:
-        - Bearer: []
-        parameters:
-        - name: project_id
-            in: path
-            required: true
-            type: integer
-        - name: confirm
-            in: query
-            required: false
-            type: boolean
-            description: Must be true to confirm deletion
-        responses:
-        200:
-            description: Project deleted successfully
-        400:
-            description: Confirmation required
-        404:
-            description: Project not found
-        403:
-            description: Unauthorized
-    """
-
+Delete a project (and all API keys under it)
+---
+tags:
+  - Projects
+security:
+  - Bearer: []
+parameters:
+  - name: project_id
+    in: path
+    required: true
+    type: integer
+  - name: confirm
+    in: query
+    required: false
+    type: boolean
+    description: Must be true to confirm deletion
+responses:
+  200:
+    description: Project deleted successfully
+  400:
+    description: Confirmation required
+  404:
+    description: Project not found
+  403:
+    description: Unauthorized
+"""
     user_id = get_jwt_identity()
 
     project = Projects.query.filter_by(
