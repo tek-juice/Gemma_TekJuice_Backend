@@ -165,3 +165,66 @@ def delete_api_key(key_id):
         "message": "API key deleted succefully",
         "deleted_key_id": key_id
     }), 200
+
+@api_key_bp.route("/keys/project_filter", methods=["GET"])
+@jwt_required()
+def get_api_keys():
+    """
+    Get API keys belonging to the logged-in user
+    Can optionally filter by project_id
+
+    Example:
+    /keys
+    /keys?project_id=1
+
+    ---
+    tags:
+      - API Keys
+
+    security:
+      - Bearer: []
+
+    parameters:
+      - name: project_id
+        in: query
+        type: integer
+        required: false
+        description: Filter API keys by project
+
+    responses:
+      200:
+        description: API keys fetched successfully
+    """
+    current_user_id = get_jwt_identity()
+
+    project_id = request.args.get("project_id", type=int)
+
+    query = ApiKey.query.filter_by(user_id = current_user_id)
+
+    if project_id:
+        query = query.filter_by(project_id=project_id)
+
+    api_keys = query.all()
+
+    if not api_keys:
+        return jsonify({
+            "message": "No API currently found",
+            "user_id": current_user_id
+        }), 404
+    
+    return jsonify({
+        "user_id": current_user_id,
+        "total_keys": len(api_keys),
+        "api_keys": [
+            {
+              "id": api_key.id,
+              "user_id" : api_key.user_id,
+              "project_id" : api_key.project_id,
+              "key": api_key.key,
+              "is_active": api_key.is_active,
+              "created_at": api_key.created_at,
+            }
+            for api_key in api_keys
+        ]
+    }), 200
+    
