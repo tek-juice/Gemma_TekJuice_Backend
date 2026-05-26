@@ -128,3 +128,56 @@ responses:
     return jsonify({
         "massage": "Project and all associated API keys deleted successfully"
     }), 200
+
+@project_bp.route("/projects", methods=["GET"])
+@jwt_required()
+def get_projects():
+    """
+    Get all projects belonging to the logged-in user
+    ---
+    tags:
+      - Projects
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: List of user projects
+        schema:
+          type: object
+          properties:
+            projects:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  created_at:
+                    type: string
+    """
+
+    current_user_id = get_jwt_identity()
+
+    projects = Projects.query.filter_by(user_id=current_user_id).all()
+
+    if not projects:
+        return jsonify({
+            "error": "You don't have any projects created",
+            "user_id": current_user_id
+        }), 404
+    
+    return jsonify({
+        "user_id": current_user_id,
+        "projects": [
+            {
+                "id": projects.id,
+                "name": projects.name,
+                "description": projects.description,
+                "user_id": projects.user_id,
+                "created_at": projects.created_at,
+            }
+            for projects in projects
+        ]
+    }), 200
