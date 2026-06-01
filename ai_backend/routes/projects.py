@@ -4,6 +4,7 @@ from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity
 from config.services.extensions import db
 from models.apikey import Projects
 from models.user import User
+from models.apikey import ApiKey
 
 project_bp = Blueprint("project_bp", __name__)
 
@@ -52,7 +53,7 @@ responses:
     description = data.get("description")
 
     if not name:
-        return jsonify({"error", "Project name is required"}), 400
+        return jsonify({"error": "Project name is required"}), 400
     
     user_id = get_jwt_identity()
 
@@ -108,25 +109,32 @@ responses:
 
     project = Projects.query.filter_by(
         id=project_id,
-        user_id = user_id
+        user_id = user_id,
+        is_deleted = False
     ).first()
 
     if not project:
-        return jsonify({"error", "Project not found"}), 404
+        return jsonify({"error": "Project not found"}), 404
     
     confirm = request.args.get("confirm", "false").lower()
 
     if confirm != "true":
         return jsonify({
             "warning": "Deleting this project will also delete all API keys under it",
-            "massage": "Add ?confirm=true to confirm deletion."
+            "message": "Add ?confirm=true to confirm deletion."
         }), 400
     
-    db.session.delete(project)
+    project.is_deleted = True
+
+    for api_key in project.apis:
+        if not api_key.is_deleted:
+          api_key.is_deleted = True
+          api_key.is_active = False
+
     db.session.commit()
 
     return jsonify({
-        "massage": "Project and all associated API keys deleted successfully"
+        "message": "Project and all associated API keys deleted successfully"
     }), 200
 
 @project_bp.route("/projects", methods=["GET"])
@@ -160,7 +168,7 @@ def get_projects():
 
     current_user_id = get_jwt_identity()
 
-    projects = Projects.query.filter_by(user_id=current_user_id).all()
+    projects = Projects.query.filter_by(user_id=current_user_id, is_deleted = False).all()
 
     if not projects:
         return jsonify({
@@ -172,12 +180,12 @@ def get_projects():
         "user_id": current_user_id,
         "projects": [
             {
-                "id": projects.id,
-                "name": projects.name,
-                "description": projects.description,
-                "user_id": projects.user_id,
-                "created_at": projects.created_at,
+                "id": p.id,
+                "name": p.name,
+                "description": p.description,
+                "user_id": p.user_id,
+                "created_at": p.created_at,
             }
-            for projects in projects
+            for p in projects
         ]
     }), 200

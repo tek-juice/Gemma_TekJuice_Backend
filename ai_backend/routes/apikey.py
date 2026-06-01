@@ -55,11 +55,11 @@ def create_api_key():
             "error": "project_id is required"
         }), 400
     
-    project = Projects.query.filter_by(id=project_id, user_id=user_id).first()
+    project = Projects.query.filter_by(id=project_id, user_id=user_id, is_deleted = False).first()
 
     if not project:
         return jsonify({
-            "error": "Project not found or not owned by user"
+            "error": "Project not found"
         }), 404
 
 
@@ -103,7 +103,7 @@ def get_api_keys_by_user():
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    api_keys = ApiKey.query.filter_by(user_id=current_user_id).all()
+    api_keys = ApiKey.query.filter_by(user_id=current_user_id, is_deleted = False).all()
 
     if not api_keys:
         return jsonify({
@@ -119,7 +119,8 @@ def get_api_keys_by_user():
                 "key": key.key,
                 "is_active": key.is_active,
                 "created_at": key.created_at,
-                "project_id": key.project_id
+                "project_id": key.project_id,
+                "is_deleted": key.is_deleted,
             }
             for key in api_keys
         ]
@@ -158,7 +159,7 @@ def delete_api_key(key_id):
             "error": "Api Key is not found"
         }), 404
     
-    db.session.delete(api_key)
+    api_key.is_deleted = True
     db.session.commit()
 
     return jsonify({
@@ -199,7 +200,7 @@ def get_api_keys():
 
     project_id = request.args.get("project_id", type=int)
 
-    query = ApiKey.query.filter_by(user_id = current_user_id)
+    query = ApiKey.query.filter_by(user_id = current_user_id, is_deleted = False)
 
     if project_id:
         query = query.filter_by(project_id=project_id)
