@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify, Response, stream_with_context
 from models.apikey import ApiKey
 from config.ollama_services import generate_stream
+from models.apikey import Tokens
+from config.services.extensions import db
 
 chat_secure_bp = Blueprint("chat_secure", __name__)
 
@@ -55,6 +57,7 @@ responses:
 
     api_key = ApiKey.query.filter_by(
         key=api_key_value,
+        is_deleted=False,
         is_active=True
     ).first()
 
@@ -70,14 +73,31 @@ responses:
 
     if not messages:
         return {"error": "Messages are required"}, 400
+    
+    full_response = []
 
     # 3. STREAM FUNCTION
     def stream():
         try:
             for chunk in generate_stream(messages, model):
+                full_response.append(chunk)
                 yield chunk 
         except Exception as e:
             yield f"\n[ERROR]: {str(e)}"
+
+        finally:
+            text = "".join(full_response)
+            tokens = len(text.split())
+
+            token_entry = Tokens(
+                user_id = api_key.user_id,
+                project_id = api_key.project_id,
+                api_key_id = api_key.id,
+                total_tokens = tokens
+            )
+
+            db.session.add(token_entry)
+            db.session.commit()
 
     return Response(
         stream_with_context(stream()),
