@@ -40,26 +40,15 @@ class ApiKey(db.Model):
     def generate_key():
         return "tj_" + secrets.token_hex(32)
     
-# class Tokens(db.Model):
-#     __tablename__= "tokens"
+class Tokens(db.Model):
+    __tablename__= "tokens"
 
-#     id  = db.Column(db.Integer, primary_key=True)
-#     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-#     project_id = db.Column(db.Integer, db.ForeignKey("key"), nullable=False)
-#     key = db.column(db.Integer, db.ForeignKey("key", nallable=False))
-#     total_tokens = db.Column(db.Integer, default=0)
-#     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    
-# class Billing(db.Model):
-#     __tablename__= "billing"
-
-#     id = db.Column(db.Integer, primary_key=True)
-#     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable = False)
-#     project_id = db.Column(db.Integer, db.ForeignKey("project_id"), nullable=False)
-#     key = db.Column(db.Integer, db.ForeignKey("key"), nullable=False)
-#     amount = db.Column(db.String(100), nullable=False)
-#     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    id  = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    project_id = db.Column(db.Integer, db.ForeignKey("projects.id"), nullable=False)
+    api_key_id = db.Column(db.Integer, db.ForeignKey("api_keys.id"), nullable=False)
+    total_tokens = db.Column(db.Integer, default=0, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
 
 
