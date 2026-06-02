@@ -231,7 +231,7 @@ def login_user():
     user =User.query.filter_by(email = email).first()
     
     if not user:
-        return jsonify({"error": "Invalid credentials"}), 401
+        return jsonify({"error": "User not found"}), 401
     
     if not check_password_hash(user.password, password):
         return jsonify({"error": "Invalid credentials"}), 401
