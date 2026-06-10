@@ -79,62 +79,48 @@ responses:
 @jwt_required()
 def delete_project(project_id):
     """
-Delete a project (and all API keys under it)
----
-tags:
-  - Projects
-security:
-  - Bearer: []
-parameters:
-  - name: project_id
-    in: path
-    required: true
-    type: integer
-  - name: confirm
-    in: query
-    required: false
-    type: boolean
-    description: Must be true to confirm deletion
-responses:
-  200:
-    description: Project deleted successfully
-  400:
-    description: Confirmation required
-  404:
-    description: Project not found
-  403:
-    description: Unauthorized
-"""
+    Delete a project (and all API keys under it)
+    ---
+    tags:
+      - Projects
+    security:
+      - Bearer: []
+    parameters:
+      - name: project_id
+        in: path
+        required: true
+        type: integer
+        description: ID of the project to delete
+    responses:
+      200:
+        description: Project deleted successfully
+      404:
+        description: Project not found
+      401:
+        description: Unauthorized
+    """
+
     user_id = get_jwt_identity()
 
     project = Projects.query.filter_by(
         id=project_id,
-        user_id = user_id,
-        is_deleted = False
+        user_id=user_id,
+        is_deleted=False
     ).first()
 
     if not project:
         return jsonify({"error": "Project not found"}), 404
-    
-    confirm = request.args.get("confirm", "false").lower()
 
-    if confirm != "true":
-        return jsonify({
-            "warning": "Deleting this project will also delete all API keys under it",
-            "message": "Add ?confirm=true to confirm deletion."
-        }), 400
-    
     project.is_deleted = True
 
     for api_key in project.apis:
-        if not api_key.is_deleted:
-          api_key.is_deleted = True
-          api_key.is_active = False
+        api_key.is_deleted = True
+        api_key.is_active = False
 
     db.session.commit()
 
     return jsonify({
-        "message": "Project and all associated API keys deleted successfully"
+        "message": "Project deleted successfully"
     }), 200
 
 @project_bp.route("/projects", methods=["GET"])
